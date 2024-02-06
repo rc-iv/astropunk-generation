@@ -5,26 +5,14 @@ const { NETWORK } = require(`${basePath}/constants/network.js`);
 const network = NETWORK.eth;
 
 // General metadata for Ethereum
-const namePrefix = "Blastronauts";
-const description = "Just a Blastronaut exploring the Blast universe";
+const namePrefix = "Blunk";
+const description = "Blunks are unique, algorithmically generated NFTs that provide access to the Blunk community.";
 const baseUri = "ipfs://NewUriToReplace";
-
-const solanaMetadata = {
-  symbol: "YC",
-  seller_fee_basis_points: 1000, // Define how much % you want from secondary market sales 1000 = 10%
-  external_url: "https://www.youtube.com/c/hashlipsnft",
-  creators: [
-    {
-      address: "7fXNuer5sbZtaTEPhtJ5g5gNtuyRoKkvxdjEjEnPN4mC",
-      share: 100,
-    },
-  ],
-};
 
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
   {
-    growEditionSizeTo: 10000,
+    growEditionSizeTo: 4443,
     layersOrder: [
       { name: "Background" },
       { name: "Helmet" },
@@ -37,13 +25,52 @@ const layerConfigurations = [
   },
 ];
 
+const compatibilityRules = {
+  "disallowedCombinations": [
+    {
+      "layer": "Head",
+      "value": "Pink With Hat",
+      "disallowedWith": [
+        {
+          "layer": "Mouth",
+          "value": "Big Beard"
+        },
+        {
+          "layer": "Mouth",
+          "value": "Black Beard"
+        },
+        {
+          "layer": "Mouth",
+          "value": "Goatee"}
+      ]
+    },
+    {
+      "layer": "Head",
+      "value": "Straight Hair Blonde",
+      "disallowedWith": [
+        {
+          "layer": "Mouth",
+          "value": "Big Beard"
+        },
+        {
+          "layer": "Mouth",
+          "value": "Black Beard"
+        },
+        {
+          "layer": "Mouth",
+          "value": "Goatee"}
+      ]
+    },
+  ]
+};
+
 const shuffleLayerConfigurations = false;
 
 const debugLogs = false;
 
 const format = {
-  width: 256,
-  height: 256,
+  width: 3000,
+  height: 3000,
   smoothing: false,
 };
 
@@ -79,7 +106,7 @@ const background = {
 };
 
 const extraMetadata = {
-  external_url: "https://raycook.io",
+  external_url: "https://www.blastblunks.com",
 };
 
 const rarityDelimiter = "#";
@@ -118,7 +145,7 @@ module.exports = {
   text,
   namePrefix,
   network,
-  solanaMetadata,
   gif,
   preview_gif,
+  compatibilityRules
 };

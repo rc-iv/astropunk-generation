@@ -19,8 +19,8 @@ const {
   text,
   namePrefix,
   network,
-  solanaMetadata,
   gif,
+  compatibilityRules
 } = require(`${basePath}/src/config.js`);
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
@@ -135,41 +135,13 @@ const addMetadata = (_dna, _edition) => {
     description: description,
     file_url: `${baseUri}/${_edition}.png`,
     custom_fields:{
-      dna: sha1(_dna),
       edition: _edition,
-      date: dateTime,
-      compiler: "HashLips Art Engine",
     },    
     ...extraMetadata,
     attributes: attributesList,
     
   };
-  if (network == NETWORK.sol) {
-    tempMetadata = {
-      //Added metadata for solana
-      name: tempMetadata.name,
-      symbol: solanaMetadata.symbol,
-      description: tempMetadata.description,
-      //Added metadata for solana
-      seller_fee_basis_points: solanaMetadata.seller_fee_basis_points,
-      image: `${_edition}.png`,
-      //Added metadata for solana
-      external_url: solanaMetadata.external_url,
-      edition: _edition,
-      ...extraMetadata,
-      attributes: tempMetadata.attributes,
-      properties: {
-        files: [
-          {
-            uri: `${_edition}.png`,
-            type: "image/png",
-          },
-        ],
-        category: "image",
-        creators: solanaMetadata.creators,
-      },
-    };
-  }
+  
   metadataList.push(tempMetadata);
   attributesList = [];
 };
@@ -236,6 +208,40 @@ const constructLayerToDna = (_dna = "", _layers = []) => {
   });
   return mappedDnaToLayers;
 };
+
+// Function to check if the specific combinations of layers are allowed
+const isSpecificCombinationAllowed = (selectedLayers) => {
+  for (const rule of compatibilityRules.disallowedCombinations) {
+    if (selectedLayers[rule.layer] === rule.value) {
+      for (const disallowed of rule.disallowedWith) {
+        if (selectedLayers[disallowed.layer] === disallowed.value) {
+          console.log(`Disallowed combination found: ${rule.layer}:${rule.value} with ${disallowed.layer}:${disallowed.value}`)
+          return false; // Disallowed specific combination found
+        }
+      }
+    }
+  }
+  return true; // All specific combinations are allowed
+};
+
+const createDnaWithSpecificCompatibilityCheck = (_layers) => {
+  let attempts = 0;
+  while (attempts < uniqueDnaTorrance) {
+    let dna = createDna(_layers); // Assume this function generates a DNA string representing layer choices
+    let selectedLayers = constructLayerToDna(dna, _layers); // Convert DNA to layer objects
+    let layerNamesAndValues = selectedLayers.reduce((acc, layer) => {
+      acc[layer.name] = layer.selectedElement.name; // Map layer names to their selected values
+      return acc;
+    }, {});
+
+    if (isSpecificCombinationAllowed(layerNamesAndValues)) {
+      return dna; // DNA is valid and respects the updated compatibility rules
+    }
+    attempts++;
+  }
+  throw new Error("Failed to generate a compatible DNA within attempt limit.");
+};
+
 
 /**
  * In some cases a DNA string may contain optional query parameters for options
@@ -339,11 +345,11 @@ function shuffle(array) {
 
 const startCreating = async () => {
   let layerConfigIndex = 0;
-  let editionCount = 1;
+  let editionCount = 0;
   let failedCount = 0;
   let abstractedIndexes = [];
   for (
-    let i = network == NETWORK.sol ? 0 : 1;
+    let i = 0;
     i <= layerConfigurations[layerConfigurations.length - 1].growEditionSizeTo;
     i++
   ) {
@@ -362,7 +368,7 @@ const startCreating = async () => {
     while (
       editionCount <= layerConfigurations[layerConfigIndex].growEditionSizeTo
     ) {
-      let newDna = createDna(layers);
+      let newDna = createDnaWithSpecificCompatibilityCheck(layers);
       if (isDnaUnique(dnaList, newDna)) {
         let results = constructLayerToDna(newDna, layers);
         let loadedElements = [];
