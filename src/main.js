@@ -1,5 +1,4 @@
 const basePath = process.cwd();
-const { NETWORK } = require(`${basePath}/constants/network.js`);
 const fs = require("fs");
 const sha1 = require(`${basePath}/node_modules/sha1`);
 const { createCanvas, loadImage } = require(`${basePath}/node_modules/canvas`);
@@ -18,7 +17,6 @@ const {
   extraMetadata,
   text,
   namePrefix,
-  network,
   gif,
   compatibilityRules
 } = require(`${basePath}/src/config.js`);
@@ -129,7 +127,6 @@ const drawBackground = () => {
 };
 
 const addMetadata = (_dna, _edition) => {
-  let dateTime = Date.now();
   let tempMetadata = {
     name: `${namePrefix} #${_edition}`,
     description: description,
